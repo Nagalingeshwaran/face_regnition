@@ -7,7 +7,7 @@ import gdown
 import os
 
 MODEL_URL = "12dI4pxOr0IbFaufdNDy5bSl_zzbVNyXE"
-MODEL_PATH = "face_recognition_model.h5"
+MODEL_PATH = "FACEREGNITION.h5"
 
 CLASS_NAMES = ["nagalingeshwaran", "vijay", "deepika"]
 
