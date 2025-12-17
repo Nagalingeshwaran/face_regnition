@@ -57,4 +57,4 @@ if uploaded_file is not None:
 
     st.success(f"### Predicted Person: {CLASS_NAMES[class_index]}")
     st.info(f"Confidence: {confidence:.2f}%")
-    st.write("Raw prediction:", prediction
+    st.write("Raw prediction:", prediction)
