@@ -15,7 +15,7 @@ st.set_page_config(page_title="Face Recognition App", layout="centered")
 MODEL_PATH = "face_model.h5"
 
 # 🔹 Replace this with your Google Drive FILE ID
-GDRIVE_FILE_ID = "12dI4pxOr0IbFaufdNDy5bSl_zzbVNyXE"
+GDRIVE_FILE_ID = "https://drive.google.com/file/d/12dI4pxOr0IbFaufdNDy5bSl_zzbVNyXE/view?usp=sharing"
 GDRIVE_URL = f"https://drive.google.com/drive/folders/1zmCsaBGlX1-JHSdTuTzdIJbo27o-RYgF={GDRIVE_FILE_ID}"
 
 # 🔹 Class labels (CHANGE based on your model)
