@@ -6,10 +6,10 @@ from tensorflow.keras.preprocessing import image
 import gdown
 import os
 
-MODEL_URL = "https://drive.google.com/uc?id=1rGhi1n9Hy3Wu-vJDVShDD77-ANFES03r"
+MODEL_URL = "12dI4pxOr0IbFaufdNDy5bSl_zzbVNyXE"
 MODEL_PATH = "face_recognition_model.h5"
 
-CLASS_NAMES = ["Saravana Kumar", "Guru Nagajothi", "Gobinath"]
+CLASS_NAMES = ["nagalingeshwaran", "vijay", "deepika"]
 
 def load_cnn_model():
     if not os.path.exists(MODEL_PATH):
