@@ -1,60 +1,68 @@
- 
 import streamlit as st
-import numpy as np
+import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
-import gdown
+import numpy as np
+from PIL import Image
 import os
+import gdown
 
-MODEL_URL = "12dI4pxOr0IbFaufdNDy5bSl_zzbVNyXE"
-MODEL_PATH = "FACEREGNITION.h5"
+# -----------------------------
+# CONFIGURATION
+# -----------------------------
+st.set_page_config(page_title="Face Recognition App", layout="centered")
 
+MODEL_PATH = "face_model.h5"
+
+# 🔹 Replace this with your Google Drive FILE ID
+GDRIVE_FILE_ID = "12dI4pxOr0IbFaufdNDy5bSl_zzbVNyXE"
+GDRIVE_URL = f"https://drive.google.com/drive/folders/1zmCsaBGlX1-JHSdTuTzdIJbo27o-RYgF={GDRIVE_FILE_ID}"
+
+# 🔹 Class labels (CHANGE based on your model)
 CLASS_NAMES = ["nagalingeshwaran", "vijay", "deepika"]
 
-def load_cnn_model():
+# -----------------------------
+# DOWNLOAD MODEL FROM GDRIVE
+# -----------------------------
+@st.cache_resource
+def load_face_model():
     if not os.path.exists(MODEL_PATH):
-        gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
-    return load_model(MODEL_PATH)
+        with st.spinner("Downloading model from Google Drive..."):
+            gdown.download(GDRIVE_URL, MODEL_PATH, quiet=False)
+    model = load_model(MODEL_PATH)
+    return model
 
-model = load_cnn_model()
+model = load_face_model()
 
-_, IMG_H, IMG_W, IMG_C = model.input_shape
-st.write("Detected model input shape:", model.input_shape)
-
-
-st.title("🧠 Face Recognition App")
-
-uploaded_file = st.file_uploader(
-    "Upload a face image",
-    type=["jpg", "jpeg", "png"]
-)
-
-if uploaded_file is not None:
-    st.image(uploaded_file, use_container_width=True)
-
-    # Handle grayscale vs RGB automatically
-    color_mode = "rgb" if IMG_C == 3 else "grayscale"
-
-    img = image.load_img(
-        uploaded_file,
-        target_size=(IMG_H, IMG_W),
-        color_mode=color_mode
-    )
-
+# -----------------------------
+# IMAGE PREPROCESSING
+# -----------------------------
+def preprocess_image(img):
+    img = img.resize((224, 224))   # change size if your model uses different input
     img_array = image.img_to_array(img)
-
-    if IMG_C == 1:
-        img_array = np.expand_dims(img_array, axis=-1)
-
     img_array = img_array / 255.0
     img_array = np.expand_dims(img_array, axis=0)
+    return img_array
 
-    st.write("Image shape sent to model:", img_array.shape)
+# -----------------------------
+# STREAMLIT UI
+# -----------------------------
+st.title("👤 Face Recognition System")
+st.write("Upload a face image to identify the person")
 
-    prediction = model.predict(img_array)
-    class_index = np.argmax(prediction)
-    confidence = np.max(prediction) * 100
+uploaded_file = st.file_uploader("Upload Face Image", type=["jpg", "jpeg", "png"])
 
-    st.success(f"### Predicted Person: {CLASS_NAMES[class_index]}")
-    st.info(f"Confidence: {confidence:.2f}%")
-    st.write("Raw prediction:", prediction)
+if uploaded_file is not None:
+    img = Image.open(uploaded_file).convert("RGB")
+    st.image(img, caption="Uploaded Image", use_column_width=True)
+
+    if st.button("🔍 Recognize Face"):
+        with st.spinner("Predicting..."):
+            processed_img = preprocess_image(img)
+            prediction = model.predict(processed_img)
+
+            predicted_class = np.argmax(prediction)
+            confidence = np.max(prediction) * 100
+
+        st.success(f"✅ **Prediction:** {CLASS_NAMES[predicted_class]}")
+        st.info(f"📊 **Confidence:** {confidence:.2f}%")
