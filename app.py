@@ -1,56 +1,42 @@
 import streamlit as st
-import numpy as np
 import tensorflow as tf
-from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
+import numpy as np
 import gdown
 import os
 
-# -----------------------------
-# CONFIG
-# -----------------------------
-MODEL_ID = "12dI4pxOr0IbFaufdNDy5bSl_zzbVNyXE"
+# Google Drive link
+url = "https://drive.google.com/file/d/12dI4pxOr0IbFaufdNDy5bSl_zzbVNyXE"
 MODEL_PATH = "FACEREGINITION.h5"
-IMG_SIZE = 128
 
-CLASS_NAMES = ["gobi", "guru", "sk"]  # change if needed
+# Download model if not exists
+if not os.path.exists(MODEL_PATH):
+    gdown.download(url, MODEL_PATH, quiet=False)
 
-# -----------------------------
-# DOWNLOAD MODEL FROM DRIVE
-# -----------------------------
-@st.cache_resource
-def load_cnn_model():
-    if not os.path.exists(MODEL_PATH):
-        st.write("Downloading model from Google Drive...")
-        gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
+# Load trained model
+model = tf.keras.models.load_model(MODEL_PATH)
 
-    model = load_model(MODEL_PATH)
-    return model
+# Class names (must match training folder names)
+class_names = ['nagalingeshwaran', 'vijay', 'deepika']
 
-model = load_cnn_model()
+st.title("🧑 Face Recognition App")
+st.write("Upload a face image to predict the person")
 
-# -----------------------------
-# STREAMLIT UI
-# -----------------------------
-st.title("🧠 Face Recognition (CNN - 3 Classes)")
-st.write("Upload a face image to identify the person")
-
+# Upload image
 uploaded_file = st.file_uploader(
-    "Upload Face Image",
+    "Choose an image",
     type=["jpg", "jpeg", "png"]
 )
 
 if uploaded_file is not None:
-    st.image(uploaded_file, caption="Uploaded Image", use_container_width=True)
-
-    img = image.load_img(uploaded_file, target_size=(IMG_SIZE, IMG_SIZE))
+    st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
+    img = image.load_img(uploaded_file, target_size=(224, 224))
     img_array = image.img_to_array(img)
     img_array = img_array / 255.0
     img_array = np.expand_dims(img_array, axis=0)
 
     prediction = model.predict(img_array)
-    class_index = np.argmax(prediction)
-    confidence = np.max(prediction) * 100
+    predicted_index = np.argmax(prediction[0])
+    predicted_class = class_names[predicted_index]
 
-    st.success(f"### Predicted Person: {CLASS_NAMES[class_index]}")
-    st.info(f"Confidence: {confidence:.2f}%")
+    st.success(f"✅ Predicted Person: **{predicted_class}**")
